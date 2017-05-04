@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::group(['prefix' => 'products'], function () {
+
+    Route::get('/', 'ProductController@index')->name('getAllProducts');
+    Route::post('/{product}', 'ProductController@buyProduct')->name('buyProduct');
+});
