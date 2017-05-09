@@ -1,0 +1,336 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "0.0.1",
+    "title": "Voucher API"
+  },
+  "paths": {
+    "/api/products": {
+      "get": {
+        "description": "Gets all available products.\n",
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "data",
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "available": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, error"
+          }
+        }
+      }
+    },
+    "/api/products/bind": {
+      "post": {
+        "description": "Attach a voucher to a product.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "json",
+            "description": "JSON object with 'product_id' and 'voucher_id",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "sting",
+                    "example": {
+                      "product_id": 3,
+                      "voucher_id": 3
+                    }
+
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "data",
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                }
+              }
+            }          },
+          "400": {
+            "description": "Bad request, error"
+          }
+        }
+      }
+    },
+    "/api/products/unbind": {
+      "post": {
+        "description": "Detach a voucher form a product.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "json",
+            "description": "JSON object with 'product_id' and 'voucher_id",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "sting",
+                    "example": {
+                      "product_id": 3,
+                      "voucher_id": 3
+                    }
+
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "data",
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                }
+              }
+            }          },
+          "400": {
+            "description": "Bad request, error"
+          }
+        }
+      }
+    },
+    "/api/products/store": {
+      "post": {
+        "description": "Create a product.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "json",
+            "description": "JSON object with 'name' and 'price.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "sting",
+                    "example": {
+                      "name": "Product example",
+                      "price": 120.20
+                      }
+
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "data",
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "price": {
+                      "type": "number"
+                    },
+                    "available": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, error"
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "post": {
+        "description": "Buy product. Makes it unavailable with attached vouchers.\n",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Product id",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "tags": [
+          "Products"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "data",
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "string"
+                }
+              }
+            }          },
+          "400": {
+            "description": "Bad request, error"
+          }
+        }
+      }
+    },
+    "/api/voucher/store": {
+      "post": {
+        "description": "Create a voucher and bind it to discount tier.\n",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "json",
+            "description": "The product to create.",
+            "schema": {
+              "type": "object",
+              "required": [
+                "data"
+              ],
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "sting",
+                    "example": {
+                      "discount_tier_id": 2,
+                      "start_date": "2017-05-09",
+                      "end_date": "2017-05-19"
+                    }
+
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "tags": [
+          "Voucher"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "schema": {
+              "title": "data",
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "discount_tier_id": {
+                      "type": "integer"
+                    },
+                    "created_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request, error"
+          }
+        }
+      }
+    }
+  }
+}
