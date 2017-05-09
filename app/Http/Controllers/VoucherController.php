@@ -15,7 +15,6 @@ class VoucherController extends ApiController
      */
     public function store(Request $request)
     {
-        return $request;
         $data = $request->data[0];
         if (!isset($data['discount_tier_id']) || empty($data['discount_tier_id'])) {
             return $this->respondBadRequest('Please specify all required fields.');
