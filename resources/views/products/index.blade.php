@@ -8,12 +8,12 @@
         </div>
 
         @if(isset($products))
-            <table class="table">
-                <tr>
+            <table class="table table-bordered table-striped data-table-custom table-hover table-responsive">
+                <thead>
                     <td>Product</td>
                     <td>Price</td>
                     <td></td>
-                </tr>
+                </thead>
                 @foreach($products as $product)
                     <tr>
                         <td>{{ $product->name }}</td>
