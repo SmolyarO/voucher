@@ -56,34 +56,74 @@ class ProductController extends ApiController
      * Create a product.
      *
      * @param Request $request
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        $data = $request->data[0];
-        if (!isset($data['name']) || empty($data['name']) || !isset($data['price']) || empty($data['price'])) {
-            return $this->respondBadRequest('Please specify all required fields.');
+        $products = [];
+
+        foreach ($request->data as $data) {
+            if (!isset($data['name']) || empty($data['name']) || !isset($data['price']) || empty($data['price'])) {
+                return $this->respondBadRequest('Please specify all required fields.');
+            }
+
+            $products[] = Product::create($data);
         }
 
-        return Product::create($request->data[0]);
+        return $this->respond($products, [], 200);
     }
 
+    /**
+     * Attach voucher to a product.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function bindVoucher(Request $request)
     {
-        $data = $request->data[0];
-        $product = Product::find($data['product_id']);
-        $product->vouchers()->attach($data['voucher_id']);
+        foreach ($request->data as $data) {
+            $product = Product::available()->find($data['product_id']);
+            $voucher = Voucher::find($data['voucher_id']);
 
-        return $this->respond('Voucher has been successfully attached to a Product.', [], 200);
+            if (empty($product)) {
+                return $this->respondNotFound('There is no such product');
+            }
+            if (empty($voucher)) {
+                return $this->respondNotFound('There is no such voucher');
+            }
+            if (empty($product->vouchers()->find($data['voucher_id']))) {
+                $product->vouchers()->attach($data['voucher_id']);
+            }
+        }
+
+        return $this->respond('Vouchers have been successfully attached to a Product.', [], 200);
     }
 
+    /**
+     * Detach voucher from a product.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function unbindVoucher(Request $request)
     {
-        $data = $request->data[0];
-        $product = Product::find($data['product_id']);
-        $product->vouchers()->detach($data['voucher_id']);
+        foreach ($request->data as $data) {
+            $product = Product::available()->find($data['product_id']);
+            $voucher = Voucher::find($data['voucher_id']);
 
-        return $this->respond('Voucher has been successfully detached from a Product.', [], 200);
+            if (empty($product)) {
+                return $this->respondNotFound('There is no such product');
+            }
+            if (empty($voucher)) {
+                return $this->respondNotFound('There is no such voucher');
+            }
+
+            if (!empty($product->vouchers()->find($data['voucher_id']))) {
+                $product->vouchers()->detach($data['voucher_id']);
+            }
+        }
+
+        return $this->respond('Vouchers has been successfully detached from a Product.', [], 200);
     }
 
     /**
@@ -92,7 +132,7 @@ class ProductController extends ApiController
      * @param $product
      * @return float
      */
-    private function priceCalculator($product)
+    private function priceCalculator(Product $product)
     {
         $discount = 0;
         $price = $product['price'];

@@ -11,15 +11,18 @@ class VoucherController extends ApiController
      * Create a voucher and bind it to discount tier.
      *
      * @param Request $request
-     * @return \Illuminate\Database\Eloquent\Model|\Illuminate\Http\JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
-        $data = $request->data[0];
-        if (!isset($data['discount_tier_id']) || empty($data['discount_tier_id'])) {
-            return $this->respondBadRequest('Please specify all required fields.');
+        $vouchers = [];
+        foreach ($request->data as $data) {
+            if (!isset($data['discount_tier_id']) || empty($data['discount_tier_id'])) {
+                return $this->respondBadRequest('Please specify all required fields.');
+            }
+            $vouchers[] = Voucher::create($data);
         }
 
-        return Voucher::create($data);
+        return $this->respond($vouchers, [], 200);
     }
 }
