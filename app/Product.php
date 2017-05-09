@@ -37,4 +37,14 @@ class Product extends Model
     {
         return $query->where('available', 1);
     }
+
+    /**
+     * Wrapper to get only active vouchers.
+     *
+     * @return mixed
+     */
+    public function activeVouchers()
+    {
+        return $this->vouchers()->active();
+    }
 }

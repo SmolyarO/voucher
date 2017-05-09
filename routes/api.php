@@ -16,3 +16,17 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::group(['prefix' => 'products'], function () {
+
+    Route::get('/', 'ProductController@index')->name('getAllProducts');
+    Route::post('bind', 'ProductController@bindVoucher')->name('bindVoucher');
+    Route::post('unbind', 'ProductController@unbindVoucher')->name('unbindVoucher');
+    Route::post('store', 'ProductController@store')->name('createProduct');
+    Route::post('{product}', 'ProductController@buy')->name('buyProduct');
+});
+
+Route::group(['prefix' => 'voucher'], function () {
+
+    Route::post('store', 'VoucherController@store')->name('createVoucher');
+});
