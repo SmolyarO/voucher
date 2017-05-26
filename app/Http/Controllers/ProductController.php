@@ -2,13 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Api\Transformers\ProductTransformer;
 use App\Product;
 use App\Voucher;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ProductController extends ApiController
 {
+    /**
+     * Transformer for the products
+     *
+     * @var ProductTransformer
+     */
+    private $transformer;
+
+    /**
+     * ProductController constructor.
+     *
+     * @param ProductTransformer $transformer
+     */
+    public function __construct(ProductTransformer $transformer)
+    {
+        $this->transformer = $transformer;
+    }
+
     /**
      * Display a listing of Products.
      *
@@ -19,11 +36,10 @@ class ProductController extends ApiController
         $products = Product::available()->with('activeVouchers')->get();
 
         foreach ($products as $product) {
-            $product['price'] = $this->priceCalculator($product);
-            unset($product['activeVouchers']);
+            $product['price'] = $product->priceCalculator($product);
         }
 
-        return $this->respond($products);
+        return $this->respond($this->transformer->transformCollection($products));
     }
 
     /**
@@ -38,7 +54,7 @@ class ProductController extends ApiController
             return $this->respondNotFound('Product is not available.');
         }
 
-        $product['price'] = $this->priceCalculator($product);
+        $product['price'] = $product->priceCalculator($product);
         $voucherIds = [];
 
         foreach ($product['activeVouchers'] as $voucher) {
@@ -83,7 +99,7 @@ class ProductController extends ApiController
     {
         foreach ($request->data as $data) {
             $product = Product::available()->find($data['product_id']);
-            $voucher = Voucher::find($data['voucher_id']);
+            $voucher = Voucher::active()->find($data['voucher_id']);
 
             if (empty($product)) {
                 return $this->respondNotFound('There is no such product');
@@ -124,26 +140,5 @@ class ProductController extends ApiController
         }
 
         return $this->respond('Vouchers has been successfully detached from a Product.', [], 200);
-    }
-
-    /**
-     * Calculates price for product according to bind vouchers.
-     *
-     * @param $product
-     * @return float
-     */
-    private function priceCalculator(Product $product)
-    {
-        $discount = 0;
-        $price = $product['price'];
-
-        foreach ($product['activeVouchers'] as $voucher) {
-            if ($voucher['start_date'] <= Carbon::now() && $voucher['end_date'] >= Carbon::now()) {
-                $discount += $voucher->discountTier()->value('amount');
-            }
-        }
-        $discount = $discount <= 0.6 ? $discount : 0.6;
-
-        return round($price - $price * $discount, 2);
     }
 }

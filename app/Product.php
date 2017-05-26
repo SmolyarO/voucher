@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
@@ -46,5 +47,26 @@ class Product extends Model
     public function activeVouchers()
     {
         return $this->vouchers()->active();
+    }
+
+    /**
+     * Calculates price for product according to bind vouchers.
+     *
+     * @param $product
+     * @return float
+     */
+    public function priceCalculator(Product $product)
+    {
+        $discount = 0;
+        $price = $product['price'];
+
+        foreach ($product['activeVouchers'] as $voucher) {
+            if ($voucher['start_date'] <= Carbon::now() && $voucher['end_date'] >= Carbon::now()) {
+                $discount += $voucher->discountTier()->value('amount');
+            }
+        }
+        $discount = $discount <= 0.6 ? $discount : 0.6;
+
+        return round($price - $price * $discount, 2);
     }
 }

@@ -2,12 +2,29 @@
 
 namespace App\Http\Controllers;
 
+use App\Api\Transformers\ProductTransformer;
 use App\Product;
 use App\Voucher;
-use Carbon\Carbon;
 
 class ProductPageController extends Controller
 {
+    /**
+     * Transformer for the products
+     *
+     * @var ProductTransformer
+     */
+    private $transformer;
+
+    /**
+     * ProductPageController constructor.
+     *
+     * @param ProductTransformer $transformer
+     */
+    public function __construct(ProductTransformer $transformer)
+    {
+        $this->transformer = $transformer;
+    }
+
     /**
      * Display a listing of Products.
      *
@@ -17,9 +34,9 @@ class ProductPageController extends Controller
     {
         $products = Product::available()->with('activeVouchers')->get();
         foreach ($products as $product) {
-            $product['price'] = $this->priceCalculator($product);
-            unset($product['activeVouchers']);
+            $product['price'] = $product->priceCalculator($product);
         }
+        $products = $this->transformer->transformCollection($products);
 
         return view('products.index', compact('products'));
     }
@@ -28,11 +45,11 @@ class ProductPageController extends Controller
      * Buy a product.
      *
      * @param Product $product
-     * @return Product
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     public function buy(Product $product)
     {
-        $product['price'] = $this->priceCalculator($product);
+        $product['price'] = $product->priceCalculator($product);
         $voucherIds = [];
 
         foreach ($product['activeVouchers'] as $voucher) {
@@ -44,27 +61,5 @@ class ProductPageController extends Controller
         $product->save();
 
         return redirect(route('getAllProducts'));
-    }
-
-    /**
-     * Calculates price for product according to bind vouchers.
-     *
-     * @param $product
-     * @return float
-     */
-    private function priceCalculator($product)
-    {
-        $discount = 0;
-        $price = $product['price'];
-
-        foreach ($product['activeVouchers'] as $voucher) {
-            if ($voucher['start_date'] <= Carbon::now() && $voucher['end_date'] >= Carbon::now()) {
-                $discount += $voucher->discountTier()->value('amount');
-            }
-        }
-
-        $discount = $discount <= 0.6 ? $discount : 0.6;
-
-        return round($price - $price * $discount, 2);
     }
 }
